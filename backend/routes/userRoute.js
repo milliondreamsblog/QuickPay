@@ -3,7 +3,7 @@ import  jwt  from 'jsonwebtoken';
 import * as z from "zod"; 
 import dotenv from "dotenv";
 import { error } from 'console';
-import { userModel } from "../db.js";
+import { accountModel, userModel } from "../db.js";
 import { authMiddleware } from '../middleware.js';
 
 
@@ -49,13 +49,21 @@ router.post('/signup' ,  async (req,res) => {
 
     const userId = user._id;
 
+    const initialBalance = 10000;
+
+    const userAccount = await accountModel.create({
+        userId: user._id,
+        balance: initialBalance
+    });
+
     const token = jwt.sign({
         userId
     },process.env.SECRET_KEY)
 
     res.json({
         message : "New user signIn has happened",
-        token :  token
+        token :  token,
+        balance: userAccount.balance
     })
 
 } )
