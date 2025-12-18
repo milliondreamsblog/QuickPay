@@ -4,9 +4,17 @@ import dotenv from 'dotenv';
 dotenv.config();  
 
 
-const db = mongoose.connect(process.env.MONGO_URL).then(
-    console.log("Connection established")
-)
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log("MongoDB connected successfully!");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+  });
 
 
 const Schema = mongoose.Schema;
@@ -43,6 +51,13 @@ const userSchema = new Schema({
         minlength : 3,
         maxlength : 9
     } ,
+    email :{
+        type : String,
+        required : true,
+        lowercase : true,
+        trim : true,
+        maxlength : 30
+    }
 
 })
 

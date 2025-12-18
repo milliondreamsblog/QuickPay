@@ -5,13 +5,14 @@ import dotenv from "dotenv";
 import { error } from 'console';
 import { accountModel, userModel } from "../db.js";
 import { authMiddleware } from '../middleware.js';
+import JWT_SECRET from "../config.js";
 
 
 const app = express();
 
 const  router = express.Router();
 
- const schema = z.object({
+const signUpSchema = z.object({
         username : z.string(),
         firstname : z.string(),
         lastname :  z.string(),
@@ -20,7 +21,7 @@ const  router = express.Router();
     })
 
 router.post('/signup' ,  async (req,res) => {
-    const parsad  =  schema.safeParse(req.body);
+    const parsad  =  signUpSchema.safeParse(req.body);
     if( !parsad.success) {
         return res.status(411).json({
             message: "Email allready exist / Incorrect input",
@@ -58,7 +59,7 @@ router.post('/signup' ,  async (req,res) => {
 
     const token = jwt.sign({
         userId
-    },process.env.SECRET_KEY)
+    },JWT_SECRET)
 
     res.json({
         message : "New user signIn has happened",
@@ -68,8 +69,50 @@ router.post('/signup' ,  async (req,res) => {
 
 } )
 
-router.post('/signin' , (req,res) => {
-    console.log("hello")
+const signInSchema = z.object({
+        username : z.string(),
+        password : z.string(),
+    })
+
+
+router.post('/signin' , async (req,res) => {
+    const parsed = signInSchema.safeParse(req.body);
+    if(!parsed.success){
+        return res.status(411).json({
+            message : "Username not of correct format",
+            error : success.error.errors
+        })
+
+    }
+    const {username , password } = parsed.data  
+
+    const user = await userModel.findOne({username});
+
+    if(!user){
+        res.status(410).json({
+            message :"Invaild credential"
+        })
+    }
+    let token;
+    if(user.password === password){
+
+        token = jwt.sign(
+            { userId: user._id, username: user.username },
+            JWT_SECRET
+        );
+
+
+    }else{
+        res.status(404).json({
+            message  : "Invaild Credential"
+        })
+    }
+
+    res.json({
+        message: "Login successful!",
+        token,
+    });
+
 } )
 
 
@@ -100,18 +143,29 @@ router.put('/' , authMiddleware, async (req,res) =>  {
 
 //To match the sub string in the data 
 router.get("/bulk" , async (req,res) => {
+
     const  filter = req.query.filter || "";
+    console.log(filter);
     const users = await userModel.find({
         $or:[{
             firstname : {
-                "$regex":filter
+                "$regex":filter , $options: "i"
             }
         },{
             lastname : {
-                "$regex":filter
+                "$regex":filter , $options: "i"
             }
 
-        }]
+        },{
+            username : {
+                "$regex":filter , $options: "i"
+            }
+        },{
+             email : {
+                "$regex":filter , $options: "i"
+            }
+        }
+    ]
     })
 
     res.json({
@@ -119,9 +173,12 @@ router.get("/bulk" , async (req,res) => {
             username: user.username,
             firstname : user.firstname,
             lastname : user.lastname,
+            email : user.email,
+
             _id : user._id
         }))
     })
+    console.log(users);
 })
 
 export default router;

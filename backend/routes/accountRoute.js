@@ -1,8 +1,8 @@
 import express from 'express';
 import  jwt  from 'jsonwebtoken';
 import mongoose from "mongoose";
-import { accountModel } from "../db";
-import { authMiddleware } from "../middleware";
+import { accountModel, userModel } from "../db.js";
+import { authMiddleware } from "../middleware.js";
 
 const app = express();
 
@@ -18,6 +18,8 @@ router.get("/balance", authMiddleware, async (req, res) => {
     }
 
     const account = await accountModel.findOne({ userId: req.userId });
+
+    console.log(account.balance)
 
     // If no account found
     if (!account) {
