@@ -123,9 +123,9 @@ const updatedUser = {
     password : z.string().optional(),
     email :  z.string().email().optional(),
 }
-router.put('/' , authMiddleware, async (req,res) =>  {
-    const {success} = await updatedUser.safeParse(req.body);
-    if(!success) {
+router.put('/update' , authMiddleware, async (req,res) =>  {
+    const parsed = await updatedUser.safeParse(req.body);
+    if(!parsed.success) {
         res.status(411).json({
             message : "Invaild input "
         })
