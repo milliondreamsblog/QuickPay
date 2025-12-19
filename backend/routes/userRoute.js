@@ -70,7 +70,7 @@ router.post('/signup' ,  async (req,res) => {
 } )
 
 const signInSchema = z.object({
-        username : z.string(),
+        email : z.string().email(),
         password : z.string(),
     })
 
@@ -84,9 +84,9 @@ router.post('/signin' , async (req,res) => {
         })
 
     }
-    const {username , password } = parsed.data  
+    const {email , password } = parsed.data  
 
-    const user = await userModel.findOne({username});
+    const user = await userModel.findOne({email});
 
     if(!user){
         res.status(410).json({
@@ -97,7 +97,7 @@ router.post('/signin' , async (req,res) => {
     if(user.password === password){
 
         token = jwt.sign(
-            { userId: user._id, username: user.username },
+            { userId: user._id, email: user.email },
             JWT_SECRET
         );
 
