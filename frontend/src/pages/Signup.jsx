@@ -8,9 +8,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom"
 
 export const Signup = () => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
     const [username, setUsername] = useState("");
+    const [firstname, setFirstName] = useState("");
+    const [lastname, setLastName] = useState("");
+    const [email , setEmail]  =  useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
@@ -20,14 +21,17 @@ export const Signup = () => {
         <Heading label={"Sign up"} />
         <SubHeading label={"Enter your infromation to create an account"} />
         <InputBox onChange={e => {
+          setUsername(e.target.value);
+        }} placeholder="Username123" label={"Username"} />
+        <InputBox onChange={e => {
           setFirstName(e.target.value);
-        }} placeholder="John" label={"First Name"} />
+        }} placeholder="Akshat" label={"First Name"} />
         <InputBox onChange={(e) => {
           setLastName(e.target.value);
-        }} placeholder="Doe" label={"Last Name"} />
+        }} placeholder="Darshi" label={"Last Name"} />
         <InputBox onChange={e => {
-          setUsername(e.target.value);
-        }} placeholder="harkirat@gmail.com" label={"Email"} />
+          setEmail(e.target.value);
+        }} placeholder="akshatsan23@gmail.com" label={"Email"} />
         <InputBox onChange={(e) => {
           setPassword(e.target.value)
         }} placeholder="123456" label={"Password"} />
@@ -35,8 +39,9 @@ export const Signup = () => {
           <Button onClick={async () => {
             const response = await axios.post("http://localhost:3000/api/v1/user/signup", {
               username,
-              firstName,
-              lastName,
+              firstname,
+              lastname,
+              email,
               password
             });
             localStorage.setItem("token", response.data.token)
