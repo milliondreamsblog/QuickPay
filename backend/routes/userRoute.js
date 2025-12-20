@@ -74,6 +74,20 @@ const signInSchema = z.object({
         password : z.string(),
     })
 
+router.get('/me' , authMiddleware ,  async (req,res) => {
+    const user = await userModel.findById(req.userId).select(
+        "firstname lastname username email"
+    )
+    if(!user){
+        res.status(400).json("User Does'nt exist");
+
+    }
+    res.json({
+        firstname : user.firstname,
+        lastname  : user.lastname,
+        username  : user.username
+    })
+})
 
 router.post('/signin' , async (req,res) => {
     const parsed = signInSchema.safeParse(req.body);
